@@ -15,14 +15,14 @@ const {
 
 router.get("/", authenticate, getContacts);
 
-router.get("/:contactId", getContactById);
+router.get("/:contactId", authenticate, getContactById);
 
-router.post("/", createContact);
+router.post("/", authenticate, createContact);
 
-router.delete("/:contactId", deleteContact);
+router.delete("/:contactId", authenticate, deleteContact);
 
-router.put("/:contactId", updateContact);
+router.put("/:contactId", authenticate, updateContact);
 
-router.patch("/:contactId/favorite", updateStatusContact);
+router.patch("/:contactId/favorite", authenticate, updateStatusContact);
 
 module.exports = router;

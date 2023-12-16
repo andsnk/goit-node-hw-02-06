@@ -7,7 +7,7 @@ const { registerSchema, loginSchema } = require("../shemas/auth");
 const ctrlWrap = require("../helpers/ctrlWrap");
 const httpError = require("../helpers/httpError");
 
-const login = async (req, res, next) => {
+const loginUser = async (req, res, next) => {
   const { error } = loginSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -25,10 +25,16 @@ const login = async (req, res, next) => {
     id: user._id,
   };
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
-  res.json({ token });
+  //   res.json({ token });
+  const newUser = await User.findByIdAndUpdate(
+    user._id,
+    { token },
+    { select: "-token -createdAt -updatedAt -password" }
+  );
+  res.json({ newUser, token });
 };
 
-const register = async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   const { error } = registerSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -44,14 +50,39 @@ const register = async (req, res, next) => {
   const newUser = await User.create({ ...req.body, password: hashPassword });
   res.status(201).json({
     email: newUser.email,
-    name: newUser.name,
+    subscription: newUser.subscription,
   });
 };
 
-const logout = async () => {};
+const logoutUser = async (req, res, next) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: "" });
+  res.json({ message: "Logout success" });
+};
+
+const getCurrent = async (req, res, next) => {
+  const { email, subscription } = req.user;
+  res.json({ email, subscription });
+};
+
+const changeSubscription = async (req, res, next) => {
+  const allowedSubscriptions = ["starter", "pro", "business"];
+  const { subscription } = req.body;
+  if (!subscription || !allowedSubscriptions.includes(subscription)) {
+    throw httpError(400, "Invalid subscription value");
+  }
+  req.user.subscription = subscription;
+  await req.user.save();
+  res.json({
+    message: "Subscription updated successfully",
+    subscription: req.user.subscription,
+  });
+};
 
 module.exports = {
-  login: ctrlWrap(login),
-  register: ctrlWrap(register),
-  logout: ctrlWrap(logout),
+  loginUser: ctrlWrap(loginUser),
+  registerUser: ctrlWrap(registerUser),
+  logoutUser: ctrlWrap(logoutUser),
+  getCurrent: ctrlWrap(getCurrent),
+  changeSubscription: ctrlWrap(changeSubscription),
 };

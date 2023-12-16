@@ -4,7 +4,17 @@ const httpError = require("../helpers/httpError");
 const ctrlWrap = require("../helpers/ctrlWrap");
 
 const getContacts = async (req, res, next) => {
-  const data = await Contact.find({});
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 20, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  const filter = { owner };
+  if (favorite !== undefined) {
+    filter.favorite = favorite;
+  }
+  const data = await Contact.find(filter, "-createdAt -updatedAt", {
+    skip,
+    limit,
+  }).populate("owner", "email subscription");
   res.status(200).json(data);
 };
 
@@ -23,7 +33,8 @@ const createContact = async (req, res, next) => {
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
-  const newContact = await Contact.create(req.body);
+  const { _id: owner } = req.user;
+  const newContact = await Contact.create({ ...req.body, owner });
   res.status(201).json(newContact);
 };
 
