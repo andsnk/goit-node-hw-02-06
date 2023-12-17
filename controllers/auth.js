@@ -66,11 +66,7 @@ const getCurrent = async (req, res, next) => {
 };
 
 const changeSubscription = async (req, res, next) => {
-  const allowedSubscriptions = ["starter", "pro", "business"];
   const { subscription } = req.body;
-  if (!subscription || !allowedSubscriptions.includes(subscription)) {
-    throw httpError(400, "Invalid subscription value");
-  }
   req.user.subscription = subscription;
   await req.user.save();
   res.json({

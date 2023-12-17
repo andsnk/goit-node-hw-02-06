@@ -31,7 +31,7 @@ const getContactById = async (req, res, next) => {
 const createContact = async (req, res, next) => {
   const { error } = contactSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    throw httpError(400, error.details[0].message);
   }
   const { _id: owner } = req.user;
   const newContact = await Contact.create({ ...req.body, owner });
@@ -53,7 +53,7 @@ const updateContact = async (req, res, next) => {
   const { name, email, phone } = req.body;
   const { error } = contactSchema.validate({ name, email, phone });
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    throw httpError(400, error.details[0].message);
   }
   const updatedContact = await Contact.findByIdAndUpdate(
     { _id: contactId },

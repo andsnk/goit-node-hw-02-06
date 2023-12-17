@@ -16,6 +16,13 @@ const authenticate = async (req, res, next) => {
     if (!user || !user.token || user.token !== token) {
       next(httpError(401, "Not authorized"));
     }
+
+    const allowedSubscriptions = ["starter", "pro", "business"];
+    const { subscription } = req.body;
+    if (!subscription || !allowedSubscriptions.includes(subscription)) {
+      next(httpError(400, "Invalid subscription value"));
+    }
+
     req.user = user;
     next();
   } catch (error) {
