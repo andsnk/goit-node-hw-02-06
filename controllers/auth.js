@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
 const path = require("path");
-const fs = require("fs/promises");
+// const fs = require("fs/promises");
 const Jimp = require("jimp");
 require("dotenv").config();
 const { SECRET_KEY } = process.env;
