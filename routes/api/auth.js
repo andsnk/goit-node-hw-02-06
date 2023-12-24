@@ -12,10 +12,14 @@ const {
   getCurrent,
   changeSubscription,
   changeAvatar,
+  verifyEmail,
+  resendVerifyEmail,
 } = require("../../controllers/auth");
 
 router.post("/login", loginUser);
 router.post("/register", registerUser);
+router.get("/verify/:verificationCode", verifyEmail);
+router.post("/verify/", resendVerifyEmail);
 router.post("/logout", authenticate, logoutUser);
 router.get("/current", authenticate, getCurrent);
 router.patch("/", authenticate, subscription, changeSubscription);
